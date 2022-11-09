@@ -70,11 +70,6 @@ umount_devices() {
 }
 
 install_packages() {
-  # Sets users cache directory
-  if [[ -n "$pacman_cache" ]]; then
-    sed -i "s|^#CacheDir.*|CacheDir = $pacman_cache|g" /etc/pacman.conf
-  fi
-
   # Installs packages
   pacstrap -c -K /mnt base linux linux-firmware $additional_packages
 }

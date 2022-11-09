@@ -17,10 +17,8 @@ locales='
 mirrors='
   https://mirror.yandex.ru/archlinux/$repo/os/$arch
 '
-
 ############################################################
 # Optional variables
-pacman_cache=/root/pacman-cache
 user_name=vlad
 user_password=
 root_password=
