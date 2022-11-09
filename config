@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+############################################################
+# Mandatory variables
+device=
+
+hostname=arch
+swap_size=500M
+kernel_options="rw console=ttyS0"
+
+timezone=Europe/Moscow
+locales='
+  en_US.UTF-8
+  ru_RU.UTF-8
+'
+mirrors='
+  https://mirror.yandex.ru/archlinux/$repo/os/$arch
+'
+
+############################################################
+# Optional variables
+pacman_cache=/root/pacman-cache
+user_name=vlad
+user_password=
+root_password=
+additional_packages=
