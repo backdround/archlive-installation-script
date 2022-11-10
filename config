@@ -8,8 +8,8 @@ set -euo pipefail
 device=
 
 hostname=arch
-swap_size=500M
-kernel_options="rw console=ttyS0"
+swap_size=4G
+kernel_options="rw"
 
 timezone=Europe/Moscow
 locales='
@@ -18,7 +18,7 @@ locales='
 '
 ############################################################
 # Optional variables
-user_name=vlad
+user_name=
 user_password=
 root_password=
 additional_packages=
