@@ -45,6 +45,7 @@ setup_mirrors() {
 
 part_device() {
   # Parts device
+  wipefs --all "$device" && sync "$device"
   echo "\
   label: gpt
   start=2048, size=240M, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
@@ -52,16 +53,18 @@ part_device() {
   type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=$rootfs_uuid
   write
   " | sfdisk --wipe-partitions always --quiet "$device" | cat
-  sync "$device"
+  sync "$device" && sleep 0.3
 
   efi_partition="$(get_partition_path_by_number "$device" 1)"
   swap_partition="$(get_partition_path_by_number "$device" 2)"
   root_partition="$(get_partition_path_by_number "$device" 3)"
 
   # Makes filesystems
+  wipefs --all "$efi_partition" "$swap_partition" "$root_partition" && sync
   mkfs.fat -F 32 "$efi_partition"
   mkswap "$swap_partition"
   mkfs.ext4 "$root_partition"
+  sync
 
   # Checks rootfs size
   local root_size_GiB=$(df -BG "$root_partition" | awk 'END {print $2}' | tr -d 'G')
