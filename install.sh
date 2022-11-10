@@ -7,16 +7,18 @@ source "$(dirname $0)/config"
 
 
 inspect_initial_assertions() {
-  echo "Checking internet"
+  title "Asserting initial checks"
+
+  message "Checking internet"
   assert_internet "Internet isn't available"
 
-  echo "Checking EFI"
+  message "Checking EFI"
   assert_efi "EFI not found"
 
-  echo "Checking current environment"
+  message "Checking current environment"
   assert_live_image "Launching environment must be a live image"
 
-  echo "Checking set variables"
+  message "Checking set variables"
 
   assert_block_device "$device" "Flash device must be a block device"
 
@@ -31,21 +33,34 @@ inspect_initial_assertions() {
 
 setup_mirrors() {
   # Adds user mirrors
+  title "Setting up mirrors"
+  message "Adding user mirrors"
   echo "$mirrors" | sed "s/^/Server = /g" >> /etc/pacman.d/mirrorlist
 
   if which curl >/dev/null 2>&1 ; then
     # Adds USA mirrors
+    message "Adding USA mirrors"
     request="https://archlinux.org/mirrorlist/?country=US&protocol=https&use_mirror_status=on"
     curl -s "$request" | sed -e 's/^#Server/Server/' -e '/^#/d' -e '/^$/d' >> /etc/pacman.d/mirrorlist
   fi
 
   # Updates after mirrors change
+  message "Updating system with new mirrrors"
   pacman --noconfirm -Syyuu
 }
 
+install_requirements() {
+  # Installs requirements
+  title "Installing script requirements"
+  pacman --needed --noconfirm -S dosfstools arch-install-scripts
+}
+
 part_device() {
+  title "Parting device"
+
   # Parts device
   wipefs --all "$device" && sync "$device"
+  message "Parting $device"
   echo "\
   label: gpt
   start=2048, size=240M, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
@@ -60,6 +75,7 @@ part_device() {
   root_partition="$(get_partition_path_by_number "$device" 3)"
 
   # Makes filesystems
+  message "Makeing filesystems on $device"
   wipefs --all "$efi_partition" "$swap_partition" "$root_partition" && sync
   mkfs.fat -F 32 "$efi_partition"
   mkswap "$swap_partition"
@@ -74,25 +90,29 @@ part_device() {
   fi
 }
 
-mount_devices() {
+mount_partitions() {
+  title "Mounting partitions"
   mount "$root_partition" /mnt
   mkdir -p /mnt/boot/
   mount "$efi_partition" /mnt/boot/
   swapon "$swap_partition"
 }
 
-umount_devices() {
+umount_partitions() {
+  title "Umounting partitions"
   umount -R /mnt
   swapoff "$swap_partition"
 }
 
 install_packages() {
   # Installs packages
+  title "Installing rootfs packages"
   pacstrap -c -K /mnt base linux linux-firmware $additional_packages
 }
 
 install_systemd_loader() {
   # Installs systemd-boot
+  title "Installing systemd loader"
   arch-chroot /mnt <<< "bootctl install"
 
   cat > /mnt/boot/loader/entries/arch.conf <<EOF
@@ -104,6 +124,7 @@ EOF
 }
 
 configure() {
+  title "Configuring new system"
 
   # Generates mount table based on current /mnt mounts.
   genfstab -U /mnt >> /mnt/etc/fstab
@@ -163,13 +184,12 @@ inspect_initial_assertions
 
 setup_mirrors
 
-# Installs requirements
-pacman --noconfirm -S dosfstools arch-install-scripts
+install_requirements
 
 part_device
 
-trap umount_devices EXIT
-mount_devices
+trap umount_partitions EXIT
+mount_partitions
 
 install_packages
 

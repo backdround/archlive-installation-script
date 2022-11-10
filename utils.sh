@@ -4,6 +4,8 @@ set -euo pipefail
 
 OUTPUT_RED='\033[1;31m'
 OUTPUT_YELLOW='\033[1;33m'
+OUTPUT_BLUE='\033[1;34m'
+OUTPUT_GREEN='\033[32m'
 OUTPUT_RESET="$(tput sgr0)"
 
 error() {
@@ -13,6 +15,16 @@ error() {
 
 warning() {
   echo -e "$OUTPUT_YELLOW""$@""$OUTPUT_RESET" >&2
+}
+
+title() {
+  echo -en "\n$OUTPUT_BLUE#######---$OUTPUT_RESET "
+  echo -n "$@"
+  echo -en " $OUTPUT_BLUE---#######$OUTPUT_RESET\n"
+}
+
+message() {
+  echo -e "$OUTPUT_GREEN""$@""$OUTPUT_RESET"
 }
 
 remove_empty_lines_and_empty_space() {
