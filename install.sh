@@ -29,6 +29,20 @@ inspect_initial_assertions() {
   check_mirrors "$mirrors" "Unable to parse format of mirror"
 }
 
+setup_mirrors() {
+  # Adds user mirrors
+  echo "$mirrors" | sed "s/^/Server = /g" >> /etc/pacman.d/mirrorlist
+
+  if which curl >/dev/null 2>&1 ; then
+    # Adds USA mirrors
+    request="https://archlinux.org/mirrorlist/?country=US&protocol=https&use_mirror_status=on"
+    curl -s "$request" | sed -e 's/^#Server/Server/' -e '/^#/d' -e '/^$/d' >> /etc/pacman.d/mirrorlist
+  fi
+
+  # Updates after mirrors change
+  pacman --noconfirm -Syyuu
+}
+
 part_device() {
   # Parts device
   echo "\
@@ -70,15 +84,6 @@ umount_devices() {
 }
 
 install_packages() {
-  # Adds user mirrors
-  echo "$mirrors" | sed "s/^/Server = /g" >> /etc/pacman.d/mirrorlist
-  # Adds USA mirrors
-  request="https://archlinux.org/mirrorlist/?country=US&protocol=https&use_mirror_status=on"
-  curl -s "$request" | sed -e 's/^#Server/Server/' -e '/^#/d' -e '/^$/d' >> /etc/pacman.d/mirrorlist
-
-  # Updates after mirrors change
-  pacman --noconfirm -Syyuu
-
   # Installs packages
   pacstrap -c -K /mnt base linux linux-firmware $additional_packages
 }
@@ -150,7 +155,13 @@ configure() {
 locales="$(remove_empty_lines_and_empty_space "$locales")"
 mirrors="$(remove_empty_lines_and_empty_space "$mirrors")"
 rootfs_uuid="$(uuidgen)"
+
 inspect_initial_assertions
+
+setup_mirrors
+
+# Installs requirements
+pacman --noconfirm -S dosfstools arch-install-scripts
 
 part_device
 
