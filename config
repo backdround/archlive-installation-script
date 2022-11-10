@@ -14,12 +14,13 @@ locales='
   en_US.UTF-8
   ru_RU.UTF-8
 '
-mirrors='
-  https://mirror.yandex.ru/archlinux/$repo/os/$arch
-'
 ############################################################
 # Optional variables
 user_name=vlad
 user_password=
 root_password=
 additional_packages=
+
+mirrors='
+  https://mirror.yandex.ru/archlinux/$repo/os/$arch
+'

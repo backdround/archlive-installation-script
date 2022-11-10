@@ -70,6 +70,15 @@ umount_devices() {
 }
 
 install_packages() {
+  # Adds user mirrors
+  echo "$mirrors" | sed "s/^/Server = /g" >> /etc/pacman.d/mirrorlist
+  # Adds USA mirrors
+  request="https://archlinux.org/mirrorlist/?country=US&protocol=https&use_mirror_status=on"
+  curl -s "$request" | sed -e 's/^#Server/Server/' -e '/^#/d' -e '/^$/d' >> /etc/pacman.d/mirrorlist
+
+  # Updates after mirrors change
+  pacman --noconfirm -Syyuu
+
   # Installs packages
   pacstrap -c -K /mnt base linux linux-firmware $additional_packages
 }
