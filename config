@@ -3,6 +3,8 @@ set -euo pipefail
 
 ############################################################
 # Mandatory variables
+
+# Path to block flashed device
 device=
 
 hostname=arch
