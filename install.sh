@@ -44,15 +44,9 @@ setup_mirrors() {
     curl -s "$request" | sed -e 's/^#Server/Server/' -e '/^#/d' -e '/^$/d' >> /etc/pacman.d/mirrorlist
   fi
 
-  # Updates after mirrors change
-  message "Updating system with new mirrrors"
-  pacman --noconfirm -Syyuu
-}
-
-install_requirements() {
-  # Installs requirements
-  title "Installing script requirements"
-  pacman --needed --noconfirm -S dosfstools arch-install-scripts
+  # Updates database after mirrors change
+  message "Updating database with new mirrrors"
+  pacman --noconfirm -Syy
 }
 
 part_device() {
@@ -183,8 +177,6 @@ rootfs_uuid="$(uuidgen)"
 inspect_initial_assertions
 
 setup_mirrors
-
-install_requirements
 
 part_device
 
