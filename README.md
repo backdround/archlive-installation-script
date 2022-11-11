@@ -14,4 +14,4 @@ This is a script that supplies you to install archlinux from arch-live iamge (is
 2) Ensure that the requirements are present
 3) Download current project
 4) **Adjust config file**
-5) **Launch**
+5) **Launch** `install.sh`
