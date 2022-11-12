@@ -169,6 +169,15 @@ configure() {
   fi
 }
 
+run_user_script() {
+  if [[ -z "$post_bash_script" ]]; then
+    return 0
+  fi
+
+  title "Running user script"
+  arch-chroot "$new_root" /bin/bash <<< "$post_bash_script"
+}
+
 
 locales="$(remove_empty_lines_and_empty_space "$locales")"
 mirrors="$(remove_empty_lines_and_empty_space "$mirrors")"
@@ -188,4 +197,5 @@ install_packages
 
 install_systemd_loader
 configure
+run_user_script
 sync

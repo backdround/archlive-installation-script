@@ -28,3 +28,6 @@ additional_packages=(
 mirrors='
   https://mirror.yandex.ru/archlinux/$repo/os/$arch
 '
+
+# Script under chroot on new root
+post_bash_script=
