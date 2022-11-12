@@ -107,7 +107,7 @@ install_packages() {
 install_systemd_loader() {
   # Installs systemd-boot
   title "Installing systemd loader"
-  arch-chroot /mnt <<< "bootctl install"
+  arch-chroot /mnt bootctl install
 
   cat > /mnt/boot/loader/entries/arch.conf <<EOF
   title Arch Linux
@@ -137,10 +137,10 @@ configure() {
   main_locale="$(echo "$locales" | head -1)"
   echo "LANG=$main_locale" > /mnt/etc/locale.conf
 
-  arch-chroot /mnt <<< "locale-gen"
+  arch-chroot /mnt locale-gen
 
   # Synchronizes system clocks
-  arch-chroot /mnt <<< "hwclock --systohc"
+  arch-chroot /mnt hwclock --systohc
 
   # Sets hostname
   echo "$hostname" > /mnt/etc/hostname
@@ -151,11 +151,10 @@ configure() {
 
     if [[ -n $password ]]; then
       # Sets password
-      arch-chroot /mnt <<< \
-        "echo -e \"$password\n$password\" | passwd \"$user\""
+      arch-chroot /mnt bash -c "echo -e '$password\n$password' | passwd '$user'"
     else
       # Deletes password
-      arch-chroot /mnt <<< "passwd -d \"$user\""
+      arch-chroot /mnt passwd -d "$user"
     fi
   }
 
@@ -164,7 +163,7 @@ configure() {
 
   # Creates user
   if [[ -n ${user_name:-} ]]; then
-    arch-chroot /mnt <<< "useradd --create-home \"$user_name\""
+    arch-chroot /mnt useradd --create-home "$user_name"
     change_password_chroot "$user_name" "${user_password:-}"
   fi
 }
