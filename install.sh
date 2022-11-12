@@ -87,30 +87,30 @@ part_device() {
 
 mount_partitions() {
   title "Mounting partitions"
-  mount "$root_partition" /mnt
-  mkdir -p /mnt/boot/
-  mount "$efi_partition" /mnt/boot/
+  mount "$root_partition" "$new_root"
+  mkdir -p "$new_root"/boot/
+  mount "$efi_partition" "$new_root"/boot/
   swapon "$swap_partition"
 }
 
 umount_partitions() {
   title "Umounting partitions"
-  umount -R /mnt
+  umount -R "$new_root"
   swapoff "$swap_partition"
 }
 
 install_packages() {
   # Installs packages
   title "Installing rootfs packages"
-  pacstrap -c -K /mnt base linux "${additional_packages[@]}"
+  pacstrap -c -K "$new_root" base linux "${additional_packages[@]}"
 }
 
 install_systemd_loader() {
   # Installs systemd-boot
   title "Installing systemd loader"
-  arch-chroot /mnt bootctl install
+  arch-chroot "$new_root" bootctl install
 
-  cat > /mnt/boot/loader/entries/arch.conf <<EOF
+  cat > "$new_root"/boot/loader/entries/arch.conf <<EOF
   title Arch Linux
   linux /vmlinuz-linux
   initrd /initramfs-linux.img
@@ -121,30 +121,30 @@ EOF
 configure() {
   title "Configuring new system"
 
-  # Generates mount table based on current /mnt mounts.
-  genfstab -U /mnt >> /mnt/etc/fstab
+  # Generates mount table based on current "$new_root" mounts.
+  genfstab -U "$new_root" >> "$new_root"/etc/fstab
 
   # Sets localzone
-  ln -sf /usr/share/zoneinfo/$timezone /mnt/etc/localtime
+  ln -sf /usr/share/zoneinfo/$timezone "$new_root"/etc/localtime
 
   # Sets mirrors
-  echo "$mirrors" >> /mnt/etc/pacman.d/mirrorlist
+  echo "$mirrors" >> "$new_root"/etc/pacman.d/mirrorlist
 
   # Configure locales
   while read locale; do
-    sed -i "s/#$locale/$locale/g" /mnt/etc/locale.gen
+    sed -i "s/#$locale/$locale/g" "$new_root"/etc/locale.gen
   done <<< "$locales"
 
   main_locale="$(echo "$locales" | head -1)"
-  echo "LANG=$main_locale" > /mnt/etc/locale.conf
+  echo "LANG=$main_locale" > "$new_root"/etc/locale.conf
 
-  arch-chroot /mnt locale-gen
+  arch-chroot "$new_root" locale-gen
 
   # Synchronizes system clocks
-  arch-chroot /mnt hwclock --systohc
+  arch-chroot "$new_root" hwclock --systohc
 
   # Sets hostname
-  echo "$hostname" > /mnt/etc/hostname
+  echo "$hostname" > "$new_root"/etc/hostname
 
   change_password_chroot() {
     local user="$1"
@@ -152,10 +152,10 @@ configure() {
 
     if [[ -n $password ]]; then
       # Sets password
-      arch-chroot /mnt bash -c "echo -e '$password\n$password' | passwd '$user'"
+      arch-chroot "$new_root" bash -c "echo -e '$password\n$password' | passwd '$user'"
     else
       # Deletes password
-      arch-chroot /mnt passwd -d "$user"
+      arch-chroot "$new_root" passwd -d "$user"
     fi
   }
 
@@ -164,7 +164,7 @@ configure() {
 
   # Creates user
   if [[ -n ${user_name:-} ]]; then
-    arch-chroot /mnt useradd --create-home "$user_name"
+    arch-chroot "$new_root" useradd --create-home "$user_name"
     change_password_chroot "$user_name" "${user_password:-}"
   fi
 }
@@ -172,6 +172,7 @@ configure() {
 
 locales="$(remove_empty_lines_and_empty_space "$locales")"
 mirrors="$(remove_empty_lines_and_empty_space "$mirrors")"
+new_root="/mnt"
 rootfs_uuid="$(uuidgen)"
 
 inspect_initial_assertions
