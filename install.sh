@@ -160,7 +160,7 @@ configure() {
   }
 
   # Sets root password
-  change_password_chroot root "${password:-}"
+  change_password_chroot root "${root_password:-}"
 
   # Creates user
   if [[ -n ${user_name:-} ]]; then
