@@ -21,7 +21,9 @@ locales='
 user_name=
 user_password=
 root_password=
-additional_packages=
+additional_packages=(
+  linux-firmware
+)
 
 mirrors='
   https://mirror.yandex.ru/archlinux/$repo/os/$arch

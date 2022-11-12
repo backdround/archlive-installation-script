@@ -5,7 +5,6 @@ set -euo pipefail
 source "$(dirname $0)/utils.sh"
 source "$(dirname $0)/config"
 
-
 inspect_initial_assertions() {
   title "Asserting initial checks"
 
@@ -24,6 +23,8 @@ inspect_initial_assertions() {
 
   assert_not_empty "$hostname" "hostname name must be set"
   assert_size "$swap_size" "swap_size has incorrect format"
+  assert_additional_packages "additional_packages" \
+    "additional packages (variable) must be an array if set"
   check_not_empty "$kernel_options" "Kernel options are empty. Are you sure?"
 
   check_timezone "$timezone" "Unable to find given timezone in current environment"
@@ -101,7 +102,7 @@ umount_partitions() {
 install_packages() {
   # Installs packages
   title "Installing rootfs packages"
-  pacstrap -c -K /mnt base linux linux-firmware $additional_packages
+  pacstrap -c -K /mnt base linux "${additional_packages[@]}"
 }
 
 install_systemd_loader() {

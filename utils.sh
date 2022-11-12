@@ -85,6 +85,19 @@ assert_size() {
   fi
 }
 
+assert_additional_packages() {
+  # Allow empty
+  if [[ -z "${!1:-}" ]]; then
+    return 0
+  fi
+
+  # Allow array
+  if [[ ! "$(declare -p $1)" =~ "declare -a" ]]; then
+    shift
+    error "$@"
+  fi
+}
+
 check_timezone() {
   test -f "/usr/share/zoneinfo/$1" || {
     shift
