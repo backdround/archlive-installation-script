@@ -175,7 +175,9 @@ run_user_script() {
   fi
 
   title "Running user script"
-  arch-chroot "$new_root" /bin/bash <<< "$post_bash_script"
+  arch-chroot "$new_root" /bin/bash <<< "$post_bash_script" || {
+    error "User script exits with error"
+  }
 }
 
 
