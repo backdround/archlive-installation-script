@@ -126,3 +126,22 @@ check_mirrors() {
     fi
   done <<< "$mirrors"
 }
+
+uncomment_line() {
+  line="${1:-}"
+  file="${2:-}"
+
+  # Checks arguments
+  assert_not_empty "$line" "Line is empty"
+  test -f "$file" || {
+    error "There is no such file: $file"
+  }
+
+  # Performs uncommenting
+  grep -q "$line" "$file" || {
+    error "There is no line \"$line\" in file \"$file\""
+  }
+
+  sed -i "s~#\s*$line~$line~g" "$file"
+}
+

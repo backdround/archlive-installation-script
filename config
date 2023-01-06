@@ -20,6 +20,7 @@ locales='
 # Optional variables
 user_name=
 user_password=
+paswordless_sudo=false
 root_password=
 additional_packages=(
   linux-firmware

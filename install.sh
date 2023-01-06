@@ -102,7 +102,7 @@ umount_partitions() {
 install_packages() {
   # Installs packages
   title "Installing rootfs packages"
-  pacstrap -c -K "$new_root" base linux "${additional_packages[@]}"
+  pacstrap -c -K "$new_root" base linux sudo "${additional_packages[@]}"
 }
 
 install_systemd_loader() {
@@ -132,7 +132,7 @@ configure() {
 
   # Configure locales
   while read locale; do
-    sed -i "s/#$locale/$locale/g" "$new_root"/etc/locale.gen
+    uncomment_line "$locale" "$new_root/etc/locale.gen"
   done <<< "$locales"
 
   main_locale="$(echo "$locales" | head -1)"
@@ -164,8 +164,17 @@ configure() {
 
   # Creates user
   if [[ -n ${user_name:-} ]]; then
-    arch-chroot "$new_root" useradd --create-home "$user_name"
+    arch-chroot "$new_root" useradd \
+      --groups wheel \
+      --create-home "$user_name"
     change_password_chroot "$user_name" "${user_password:-}"
+
+    # Settings sudo up
+    sudoers="$new_root"/etc/sudoers
+    uncomment_line "%wheel ALL=(ALL:ALL) ALL" "$sudoers"
+    if [[ ${paswordless_sudo:-} == "true" ]]; then
+      uncomment_line "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" "$sudoers"
+    fi
   fi
 }
 
