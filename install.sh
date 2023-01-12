@@ -128,7 +128,7 @@ configure() {
   ln -sf /usr/share/zoneinfo/$timezone "$new_root"/etc/localtime
 
   # Sets mirrors
-  echo "$mirrors" >> "$new_root"/etc/pacman.d/mirrorlist
+  echo "$mirrors" | sed "s/^/Server = /g" >> "$new_root"/etc/pacman.d/mirrorlist
 
   # Configure locales
   while read locale; do
