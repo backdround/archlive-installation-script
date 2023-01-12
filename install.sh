@@ -102,7 +102,8 @@ umount_partitions() {
 install_packages() {
   # Installs packages
   title "Installing rootfs packages"
-  pacstrap -c -K "$new_root" base linux sudo "${additional_packages[@]}"
+  pacstrap -c -K "$new_root" networkmanager base linux sudo \
+    "${additional_packages[@]}"
 }
 
 install_systemd_loader() {
@@ -145,6 +146,9 @@ configure() {
 
   # Sets hostname
   echo "$hostname" > "$new_root"/etc/hostname
+
+  # Sets up network
+  systemctl enable NetworkManager
 
   change_password_chroot() {
     local user="$1"
