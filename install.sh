@@ -30,6 +30,7 @@ inspect_initial_assertions() {
   check_timezone "$timezone" "Unable to find given timezone in current environment"
   check_locales "$locales" "Unable to find given locale in current environment"
   check_mirrors "$mirrors" "Unable to parse format of mirror"
+  check_path_to_copy "$path_to_copy" "Given path to copy doesn't exist"
 }
 
 setup_mirrors() {
@@ -182,6 +183,15 @@ configure() {
   fi
 }
 
+copy_user_path_if_exists() {
+  if [[ -z "${path_to_copy:-}" ]]; then
+    return 0
+  fi
+
+  title 'Copy "path to copy" into new root'
+  cp -af "$path_to_copy" "$new_root/root"
+}
+
 run_user_script() {
   if [[ -z "$post_bash_script" ]]; then
     return 0
@@ -212,5 +222,6 @@ install_packages
 
 install_systemd_loader
 configure
+copy_user_path_if_exists
 run_user_script
 sync

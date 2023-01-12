@@ -127,6 +127,17 @@ check_mirrors() {
   done <<< "$mirrors"
 }
 
+check_path_to_copy() {
+  test -z "${1:-}" || {
+    return 0
+  }
+
+  test -e "$1" || {
+    shift
+    error "$@"
+  }
+}
+
 uncomment_line() {
   line="${1:-}"
   file="${2:-}"

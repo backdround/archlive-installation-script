@@ -30,5 +30,8 @@ mirrors='
   https://mirror.yandex.ru/archlinux/$repo/os/$arch
 '
 
+# Local path to copy into "$new_os_root"/root.
+path_to_copy=
+
 # Script under chroot on new root
 post_bash_script=
