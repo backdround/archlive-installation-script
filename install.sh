@@ -148,7 +148,7 @@ configure() {
   echo "$hostname" > "$new_root"/etc/hostname
 
   # Sets up network
-  systemctl enable NetworkManager
+  arch-chroot "$new_root" systemctl enable NetworkManager
 
   change_password_chroot() {
     local user="$1"
