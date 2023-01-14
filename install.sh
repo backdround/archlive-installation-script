@@ -79,9 +79,12 @@ part_device() {
   sync
 
   # Checks rootfs size
-  local root_size_GiB=$(df -BG "$root_partition" | awk 'END {print $2}' | tr -d 'G')
+  local root_size_GiB=$(lsblk -bno SIZE "$root_partition" \
+    | awk '{printf "%d", $1/1024/1024/1024}')
+
   if [[ $root_size_GiB -le 1 ]]; then
     df -BG "$root_partition" | awk 'END {print $2}'
+    echo "$root_partition is ${root_size_GiB}GiB"
     error "Root filesystem has size less then 1 GiB"
   fi
 }
