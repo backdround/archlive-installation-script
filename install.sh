@@ -145,8 +145,8 @@ configure() {
 
   arch-chroot "$new_root" locale-gen
 
-  # Synchronizes system clocks
-  arch-chroot "$new_root" hwclock --systohc
+  # Sets time
+  arch-chroot "$new_root" systemctl enable systemd-timesyncd
 
   # Sets hostname
   echo "$hostname" > "$new_root"/etc/hostname
