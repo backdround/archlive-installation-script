@@ -128,7 +128,7 @@ check_mirrors() {
 }
 
 check_path_to_copy() {
-  test -z "${1:-}" || {
+  test -n "${1:-}" || {
     return 0
   }
 
