@@ -85,7 +85,7 @@ assert_size() {
   fi
 }
 
-assert_additional_packages() {
+assert_optional_array() {
   # Allow empty
   if [[ -z "${!1:-}" ]]; then
     return 0

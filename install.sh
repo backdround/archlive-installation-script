@@ -8,6 +8,8 @@ source "$(dirname $0)/config"
 inspect_initial_assertions() {
   title "Asserting initial checks"
 
+  ##############################
+  # Mandatory variables
   message "Checking internet"
   assert_internet "Internet isn't available"
 
@@ -23,14 +25,19 @@ inspect_initial_assertions() {
 
   assert_not_empty "$hostname" "hostname name must be set"
   assert_size "$swap_size" "swap_size has incorrect format"
-  assert_additional_packages "additional_packages" \
-    "additional packages (variable) must be an array if set"
   check_not_empty "$kernel_options" "Kernel options are empty. Are you sure?"
 
   check_timezone "$timezone" "Unable to find given timezone in current environment"
   check_locales "$locales" "Unable to find given locale in current environment"
-  check_mirrors "$mirrors" "Unable to parse format of mirror"
-  check_path_to_copy "$path_to_copy" "Given path to copy doesn't exist"
+
+  ##############################
+  # Optional variables
+  assert_optional_array "user_groups" \
+    "user groups (variable) must be an array if set"
+  assert_optional_array "additional_packages" \
+    "additional packages (variable) must be an array if set"
+  check_mirrors "${mirrors:-}" "Unable to parse format of mirror"
+  check_path_to_copy "${path_to_copy:-}" "Given path to copy doesn't exist"
 }
 
 setup_mirrors() {
@@ -172,12 +179,21 @@ configure() {
 
   # Creates user
   if [[ -n ${user_name:-} ]]; then
+    # Creates user
     arch-chroot "$new_root" useradd \
       --groups wheel \
       --create-home "$user_name"
+
+    # Adds groups
+    for group in "${user_groups[@]}"; do
+      arch-chroot "$new_root" usermod \
+        --append --groups "$group" "$user_name"
+    done
+
+    # Sets password
     change_password_chroot "$user_name" "${user_password:-}"
 
-    # Settings sudo up
+    # Sets sudo up
     sudoers="$new_root"/etc/sudoers
     uncomment_line "%wheel ALL=(ALL:ALL) ALL" "$sudoers"
     if [[ ${paswordless_sudo:-} == "true" ]]; then
