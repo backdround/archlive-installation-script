@@ -37,6 +37,12 @@ get_partition_path_by_number() {
   lsblk -lp "$device" -o NAME | sed -n "$((nth + 2))p"
 }
 
+assert_positive_number() {
+  if [[ ! $1 =~ ^[1-9][0-9]*$ ]]; then
+    shift
+    error "$@"
+  fi
+}
 
 assert_not_empty() {
   test -n "$1" || {

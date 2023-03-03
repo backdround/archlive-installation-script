@@ -25,6 +25,8 @@ inspect_initial_assertions() {
 
   assert_not_empty "$hostname" "hostname name must be set"
   assert_size "$swap_size" "swap_size has incorrect format"
+  assert_positive_number "$rootfs_lower_size_limit_GiB" \
+    "rootfs_lower_size_limit_GiB must be a positive integer"
   check_not_empty "$kernel_options" "Kernel options are empty. Are you sure?"
 
   check_timezone "$timezone" "Unable to find given timezone in current environment"
@@ -89,9 +91,9 @@ part_device() {
   local root_size_GiB=$(lsblk -bno SIZE "$root_partition" \
     | awk '{printf "%d", $1/1024/1024/1024}')
 
-  if [[ $root_size_GiB -le 1 ]]; then
+  if [[ $root_size_GiB -lt $rootfs_lower_size_limit_GiB ]]; then
     echo "$root_partition is ${root_size_GiB}GiB"
-    error "Root filesystem has size less then 2 GiB"
+    error "Root filesystem has size less then $rootfs_lower_size_limit_GiB GiB"
   fi
 }
 

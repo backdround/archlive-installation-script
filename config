@@ -11,6 +11,9 @@ hostname=arch
 swap_size=4G
 kernel_options="rw"
 
+# Variable is used for check size sufficiency of rootfs partition.
+rootfs_lower_size_limit_GiB=4
+
 timezone=Europe/Moscow
 locales='
   en_US.UTF-8
